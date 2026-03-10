@@ -21,9 +21,9 @@ You'll need to install the following packages in order to run the codes.
 
 # Installation
 ## Step 1: Set Up Conda Environment
-            conda create -n envSMGC python=3.10
+    conda create -n envSMGC python=3.10
 ## Step 2: Install Requirements  
-            pip install -r requirements.txt 
+    pip install -r requirements.txt 
 ## Step 3: Uploade data
 The raw data used in this study have been uploaded to Zenodo and are freely available at https://zenodo.org/records/18631731.
 ## Step 4：Run
