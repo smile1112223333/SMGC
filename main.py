@@ -38,8 +38,8 @@ random_seed = 2022
 fix_seed(random_seed)
 
 # ---------- 路径设置 ----------
-DATA_DIR = '/root/shared-nvme/dzxdata/Human_Lymph_Nodes/A1/'  
-OUTPUT_FILE = '/root/new下游分析/clustering-visual/HLN-A1_output_results.h5ad'  # 输出文件
+DATA_DIR = '/root/shared-nvme/dzxdata/Human_Lymph_Nodes/D1/'  
+OUTPUT_FILE = '/root/new下游分析/clustering-visual/HLN-D1_output_results.h5ad'  # 输出文件
 
 # ---------- 1. 读取数据 ----------
 adata_omics1 = sc.read_h5ad(DATA_DIR + 'adata_RNA.h5ad')
@@ -121,11 +121,11 @@ mv_dataset = get_mvdataSet(adata, device=device, normalize=True)
 
 # ---------- 6. 训练 SMGC 模型 ----------
 lr = 1e-4
-epochs = 20
-latent_dim = 64
-p = 10
-batch_size = 32
-use_linear_projection = True
+epochs = 100
+latent_dim = 32
+p = 5
+batch_size = 64
+use_linear_projection = False
 
 trainer = SMGC(
     mv_dataset,
@@ -174,4 +174,5 @@ print("保存成功！")
 print(adata)
 
 if __name__ == '__main__':
+
     pass  # 所有操作已在顶层执行
