@@ -18,8 +18,16 @@ You'll need to install the following packages in order to run the codes.
 - scanpy==1.9.1
 - R == 4.0.3
 
-# Data
-本研究使用的原始数据已上传至Zenodo，并可在https://zenodo.org/records/18631731 免费获取。
 
-# Training
-    python main.py
+# Installation
+## Step 1: Set Up Conda Environment
+            conda create -n envSMGC python=3.10
+## Step 2: Install Requirements  
+            pip install -r requirements.txt 
+## Step 3: Uploade data
+The raw data used in this study have been uploaded to Zenodo and are freely available at https://zenodo.org/records/18631731.
+## Step 4：Run
+    python main.py  
+
+
+
