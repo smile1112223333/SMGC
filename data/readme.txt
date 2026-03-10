@@ -1,1 +1,1 @@
-本研究使用的原始数据已上传至Zenodo，并可在https://zenodo.org/records/18631731免费获取。
+The raw data used in this study have been uploaded to Zenodo and are freely available at https://zenodo.org/records/18631731.
