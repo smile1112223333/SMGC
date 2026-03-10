@@ -1,6 +1,5 @@
 # SMGC: Spatial Multi-omics Analysis with Granular-ball Contrastive Learning Framework
-This repository contains SMGC script essential for reproducing the benchmarking outcomes shown in the paper. 
-We provide experimental data in Zenodo with details are available in the notebook 
+
 
 # Requirements
 You'll need to install the following packages in order to run the codes.
