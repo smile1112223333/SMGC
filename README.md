@@ -20,7 +20,7 @@ You'll need to install the following packages in order to run the codes.
 14.R == 4.0.3
 
 # Data
-本研究使用的原始数据已上传至Zenodo，并可在https://zenodo.org/records/18631731免费获取。
+本研究使用的原始数据已上传至Zenodo，并可在https://zenodo.org/records/18631731 免费获取。
 
 # Training
     python main.py
