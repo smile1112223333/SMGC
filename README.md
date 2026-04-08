@@ -21,7 +21,7 @@ You'll need to install the following packages in order to run the codes.
 
 # Installation
 ## Step 1: Set Up Conda Environment
-    conda create -n envSMGC python=3.10
+    conda create -n envSMGC python=3.8
 ## Step 2: Install Requirements  
     pip install -r requirements.txt 
 ## Step 3: Uploade data
