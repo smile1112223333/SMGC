@@ -4,11 +4,11 @@ import numpy as np
 from granular.base import GranularBall, GBList, contain_same_sample
 
 
-# 两个视图的粒球集之间的关系
+# Relationship between granular ball sets of two views
 def relation_of_views_gblists(view0: GBList, view1: GBList, t=0.1):
-    # 不同视图之间的实例具有对应关系，因此需要建立跨视图粒球之间的联系
-    # 一种简单的思路是：直接按照实例对应关系建立联系，为此，需要知道每个粒球中包含哪些样本（索引）
-    # 这个关系可以作为对比学习过程的掩码
+    # Instances across different views have correspondence, so it is necessary to establish relationships between granular balls across views
+    # A simple idea is to directly establish connections based on instance correspondence; for this, we need to know which samples (indices) are contained in each granular ball
+    # This relationship can be used as a mask in the contrastive learning process
     n0, n1 = len(view0), len(view1)
     mask = np.zeros((n0, n1), dtype=np.float32)
     for i in range(n0):
@@ -40,21 +40,19 @@ def relation_of_views_gblists_tensor(view0: GBList, view1: GBList, t=0.1):
 
 
 def merge_tensors(n, m, tensor1, tensor2, tensor3, tensor4):
-    # 创建一个大小为 (n+m) * (n+m) 的零张量
+    # Create a zero tensor of size (n+m) * (n+m)
     merged_tensor = torch.zeros((n + m, n + m))
 
-    # 填充第一个 tensor 张量
+    # Fill the first tensor
     merged_tensor[:n, :n] = tensor1
 
-    # 填充第二个 tensor 张量
+    # Fill the second tensor
     merged_tensor[:n, n:n + m] = tensor2
 
-    # 填充第三个 tensor 张量
+    # Fill the third tensor
     merged_tensor[n:n + m, :n] = tensor3
 
-    # 填充第四个 tensor 张量
+    # Fill the fourth tensor
     merged_tensor[n:n + m, n:n + m] = tensor4
 
     return merged_tensor
-
-
