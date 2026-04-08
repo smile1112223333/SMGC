@@ -10,32 +10,28 @@ class GranularBall:
     """class of the granular ball"""
 
     def __init__(self, data, labels, indices):
-        """
-        :param data: 样本特征
-        :param labels: 样本标签
-        :param indices: 样本索引
-        """
+
         self.data = data
         self.labels = labels
         self.indices = np.array([indices]).squeeze().reshape(-1,)
         self.num_smp, self.dim = data.shape
         self.center = self.data.mean(0)
         arr = torch.norm(self.data - self.center, p=2, dim=1)
-        # 各点到中心点距离的平均值
+        # 
         self.r = arr.mean()
 
     def split_balls(self, p):
-        # 将该粒球划分为k个小的粒球
+        # 
         k = max(self.num_smp // p, 1)
         data = self.data.detach().cpu().numpy()
-        # 当data中有大量重复时
+        # 
         k = min(k, np.unique(data, axis=0).shape[0])
         if p == 1:
             y_part = np.arange(data.shape[0])
         else:
             kmeans = KMeans(n_clusters=k, n_init="auto", random_state=42)
             y_part = kmeans.fit_predict(data)
-        # 根据标签对样本进行划分
+        # 
         y_part = torch.from_numpy(y_part).to(torch.long)
         sub_balls = []
         for i in range(k):
@@ -86,9 +82,7 @@ class GBList:
         return torch.vstack(list(map(lambda x: x.center, self.granular_balls)))
 
     def get_rs(self):
-        """
-        :return: 返回半径r
-        """
+
         return torch.vstack(list(map(lambda x: x.r, self.granular_balls))).squeeze()
 
     def get_data(self):
@@ -110,11 +104,11 @@ class GBList:
 
     @torch.no_grad
     def affinity(self, spread=3):
-        # 获取所有中心点
+
         centers = self.get_centers()
-        # 计算不同中心点的距离
+
         dist = torch.cdist(centers, centers)
-        # 获取所有半径
+
         rs = self.get_rs()
         extra = rs.unsqueeze(0) + rs.unsqueeze(-1)
         indicate = dist <= extra
@@ -126,7 +120,7 @@ class GBList:
 class MVGBList:
     def __init__(self, mv_data, labels, p=8):
         """
-        :param mv_data: 多视图数据
+        :param mv_data:
         :param labels:
         :param p:
         """
@@ -143,7 +137,7 @@ class MVGBList:
         return self.gblists[i]
 
 
-# 是否包含同一个样本，针对不同视图的两个粒球
+
 def contain_same_sample(ball0: GranularBall, ball1: GranularBall):
     n0, n1 = ball0.num_smp, ball1.num_smp
     for i in range(n0):
@@ -153,7 +147,6 @@ def contain_same_sample(ball0: GranularBall, ball1: GranularBall):
     return False
 
 
-# 传递邻接（重叠）关系
 def transitive_neighbor_relations(a, k=3):
     while k > 0:
         a_ = torch.where(a @ a > 0, 1., 0.)
