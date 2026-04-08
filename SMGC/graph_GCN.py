@@ -137,9 +137,6 @@ class Decoder(Module):
         return x
 
 class graph_GCN:
-    """\
-    图GCN模型，只生成表示不进行优化
-    """
     
     def __init__(self, 
         data,
@@ -200,7 +197,7 @@ class graph_GCN:
         
         # 根据数据类型调整参数
         if self.datatype == 'SPOTS':
-            self.epochs = 1  # 只运行一次前向传播
+            self.epochs = 1  
         elif self.datatype == 'Stereo-CITE-seq':
             self.epochs = 1
         elif self.datatype == '10x':
@@ -226,16 +223,15 @@ class graph_GCN:
         # 初始化模型
         self.model = Encoder_overall(self.dim_input1, self.dim_output1, self.dim_input2, self.dim_output2).to(self.device)
         
-        # 不进行优化，只运行前向传播
+        
         self.model.eval()
         with torch.no_grad():
-            # 使用tqdm显示进度，但实际上只运行一次
-            for epoch in tqdm(range(self.epochs), desc="Generating representations"):
+                        for epoch in tqdm(range(self.epochs), desc="Generating representations"):
                 results = self.model(self.features_omics1, self.features_omics2, 
                                    self.adj_spatial_omics1, self.adj_feature_omics1, 
                                    self.adj_spatial_omics2, self.adj_feature_omics2)
         
-        # 直接返回四个表示，不进行归一化
+        # 直接返回四个表示
         output = {
             'emb_latent_spatial_omics1': results['emb_latent_spatial_omics1'].detach().cpu().numpy(),
             'emb_latent_spatial_omics2': results['emb_latent_spatial_omics2'].detach().cpu().numpy(),
