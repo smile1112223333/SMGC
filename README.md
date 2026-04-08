@@ -3,7 +3,7 @@
 
 # Requirements
 You'll need to install the following packages in order to run the codes.
-- python==3.10
+- python==3.8
 - anndata==0.8.0
 - cudnn>=10.2
 - h5py==3.11.0
