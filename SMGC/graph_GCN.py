@@ -42,15 +42,15 @@ class Encoder_overall(Module):
         self.encoder_omics2 = Encoder(self.dim_in_feat_omics2, self.dim_out_feat_omics2)
         
     def forward(self, features_omics1, features_omics2, adj_spatial_omics1, adj_feature_omics1, adj_spatial_omics2, adj_feature_omics2):
-        # graph1 - 空间图编码
+        # graph1 
         emb_latent_spatial_omics1 = self.encoder_omics1(features_omics1, adj_spatial_omics1)  
         emb_latent_spatial_omics2 = self.encoder_omics2(features_omics2, adj_spatial_omics2)
         
-        # graph2 - 特征图编码
+        # graph2 
         emb_latent_feature_omics1 = self.encoder_omics1(features_omics1, adj_feature_omics1)
         emb_latent_feature_omics2 = self.encoder_omics2(features_omics2, adj_feature_omics2)
 
-        # 返回四个Graph-specific representation
+        # Graph-specific representation
         results = {
             'emb_latent_spatial_omics1': emb_latent_spatial_omics1,
             'emb_latent_spatial_omics2': emb_latent_spatial_omics2,
@@ -147,7 +147,7 @@ class graph_GCN:
         dim_output=64
         ):
         '''\
-        初始化图GCN模型
+        Initialize the GCN
 
         Parameters
         ----------
@@ -171,12 +171,12 @@ class graph_GCN:
         self.dim_input = dim_input
         self.dim_output = dim_output
         
-        # 设置随机种子
+        # 
         torch.manual_seed(self.random_seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed(self.random_seed)
         
-        # 邻接矩阵
+        # 
         self.adata_omics1 = self.data['adata_omics1']
         self.adata_omics2 = self.data['adata_omics2']
         self.adj = adjacent_matrix_preprocessing(self.adata_omics1, self.adata_omics2)
@@ -185,17 +185,17 @@ class graph_GCN:
         self.adj_feature_omics1 = self.adj['adj_feature_omics1'].to(self.device)
         self.adj_feature_omics2 = self.adj['adj_feature_omics2'].to(self.device)
         
-        # 特征数据
+        # 
         self.features_omics1 = torch.FloatTensor(self.adata_omics1.obsm['feat'].copy()).to(self.device)
         self.features_omics2 = torch.FloatTensor(self.adata_omics2.obsm['feat'].copy()).to(self.device)
         
-        # 维度设置
+        # 
         self.dim_input1 = self.features_omics1.shape[1]
         self.dim_input2 = self.features_omics2.shape[1]
         self.dim_output1 = self.dim_output
         self.dim_output2 = self.dim_output
         
-        # 根据数据类型调整参数
+        
         if self.datatype == 'SPOTS':
             self.epochs = 1  
         elif self.datatype == 'Stereo-CITE-seq':
@@ -207,20 +207,18 @@ class graph_GCN:
     
     def generate_representations(self):
         """
-        生成四个Graph-specific representation
+        Graph-specific representation
         
         Returns
         -------
         output : dict
-            包含四个Graph-specific representation的字典:
-            - emb_latent_spatial_omics1: 模态1的空间图表示
-            - emb_latent_spatial_omics2: 模态2的空间图表示  
-            - emb_latent_feature_omics1: 模态1的特征图表示
-            - emb_latent_feature_omics2: 模态2的特征图表示
+            - emb_latent_spatial_omics1: Spatial Graph Representation of Modality 1
+            - emb_latent_spatial_omics2: Spatial Graph Representation of Modality 2  
+            - emb_latent_feature_omics1: Feature Graph Representation of Modality 1
+            - emb_latent_feature_omics2: Feature Graph Representation of Modality 2
         """
         print("Generating Graph-specific representations...")
         
-        # 初始化模型
         self.model = Encoder_overall(self.dim_input1, self.dim_output1, self.dim_input2, self.dim_output2).to(self.device)
         
         
@@ -231,7 +229,6 @@ class graph_GCN:
                                    self.adj_spatial_omics1, self.adj_feature_omics1, 
                                    self.adj_spatial_omics2, self.adj_feature_omics2)
         
-        # 直接返回四个表示
         output = {
             'emb_latent_spatial_omics1': results['emb_latent_spatial_omics1'].detach().cpu().numpy(),
             'emb_latent_spatial_omics2': results['emb_latent_spatial_omics2'].detach().cpu().numpy(),
@@ -246,12 +243,11 @@ class graph_GCN:
 
     def get_model_info(self):
         """
-        获取模型信息
         
         Returns
         -------
         info : dict
-            包含模型配置信息的字典
+            dictionary containing model configuration information
         """
         info = {
             'datatype': self.datatype,
