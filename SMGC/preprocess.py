@@ -235,66 +235,63 @@ def fix_seed(seed):
 
 
 def get_mvdataSet(adata, device, normalize=True):
-    # -------------------------- 1. 处理标签 --------------------------
+    # 
     labels = adata.obs['ground_truth']
     
     if labels.dtype == 'object' or isinstance(labels.iloc[0], str):
         label_encoder = LabelEncoder()
         labels = label_encoder.fit_transform(labels)
-        print(f"标签编码映射: {dict(zip(label_encoder.classes_, range(len(label_encoder.classes_))))}")
+        print(f"labels: {dict(zip(label_encoder.classes_, range(len(label_encoder.classes_))))}")
     else:
         labels = labels.values
     
-    # -------------------------- 2. 加载4个视图（tensor转换逻辑不变，正确可行） --------------------------
+    # 
     view_list = []
     
-    # 视图1：模态1 空间图表示
+    # view1 Spatial Graph Representation of Modality 1
     view_1 = adata.obsm['emb_spatial_omics1']
     view_1 = torch.tensor(view_1, dtype=torch.float32) 
     view_list.append(view_1)
     
-    # 视图2：模态2 空间图表示
+    # view2 Spatial Graph Representation of Modality 2
     view_2 = adata.obsm['emb_spatial_omics2']
     view_2 = torch.tensor(view_2, dtype=torch.float32)
     view_list.append(view_2)
     
-    # 视图3：模态1 特征图表示
+    # view3 Feature Graph Representation of Modality 1
     view_3 = adata.obsm['emb_feature_omics1']
     view_3 = torch.tensor(view_3, dtype=torch.float32)
     view_list.append(view_3)
     
-    # 视图4：模态2 特征图表示
+    # 视图4：Feature Graph Representation of Modality 2
     view_4 = adata.obsm['emb_feature_omics2']
     view_4 = torch.tensor(view_4, dtype=torch.float32)
     view_list.append(view_4)
     
-    # -------------------------- 3. 对齐样本长度 --------------------------
+    
     min_len = min([v.shape[0] for v in view_list])
     min_len_idx = torch.arange(min_len)
     view_list = [v[min_len_idx] for v in view_list]
     labels = labels[min_len_idx.cpu().numpy()]
     
-    # -------------------------- 4. 归一化（按你的要求修改格式） --------------------------
+    
     view_dims = []
-    data = view_list  # 定义data变量，和你给的代码格式一致
-    for i in range(len(data)):  # 循环变量改为data[i]
+    data = view_list  
+    for i in range(len(data)): 
         if normalize:
             max_value, _ = torch.max(data[i], dim=0, keepdim=True)
             min_value, _ = torch.min(data[i], dim=0, keepdim=True)
-            # 完全按你指定的公式：(data[i] - min_value) / (max_value - min_value + 1e-12)
+           
             data[i] = (data[i] - min_value) / (max_value - min_value + 1e-12)
         
-        view_dims.append(data[i].shape[1])  # 记录视图维度
+        view_dims.append(data[i].shape[1])  
     
-    # -------------------------- 5. 数据集类 --------------------------
-    # 正确的Dataset __init__（仅存CPU tensor）
-    # 修正后的 MVDataset（在 get_mvdataSet 函数内部）
+
     class MVDataset:
         def __init__(self, view_list, view_dims, labels):
-            # 所有视图都存CPU tensor（不提前移GPU！）
-            self.view_list = view_list  # view_list 中的每个元素都是 CPU tensor
-            self.num_view = len(view_list)  # 固定为4（之前已强制检查）
-            self.view_dims = view_dims  # 每个视图的维度（如[128,128,128,128]）
+            self.view_list = view_list 
+            self.num_view = len(view_list) 
+            self.view_dims = view_dims 
             self.labels = torch.tensor(labels, dtype=torch.int64).view(-1)  # CPU tensor
             self.num_class = len(torch.unique(self.labels))
             self.length = len(view_list[0]) if view_list else 0
@@ -303,90 +300,59 @@ def get_mvdataSet(adata, device, normalize=True):
             return self.length
         
         def __getitem__(self, idx):
-            # 返回：[4个单样本CPU tensor] + 单样本CPU标签
             return [view[idx] for view in self.view_list], self.labels[idx]
     
-    # -------------------------- 6. 创建数据集实例 --------------------------
     mv_dataset = MVDataset(view_list, view_dims, labels)
     
     # 打印信息
-    print(f"\n数据集信息：")
-    print(f"- 样本数量: {len(mv_dataset)}")
-    print(f"- 视图数量: {mv_dataset.num_view}")
-    print(f"- 每个视图维度: {mv_dataset.view_dims}")
-    print(f"- 类别数量: {mv_dataset.num_class}")
-    # print(f"- 标签分布: {torch.bincount(mv_dataset.labels).cpu().numpy()}")
+    print(f"\n Dataset information：")
+    print(f"- Number of samples: {len(mv_dataset)}")
+    print(f"- Number of views: {mv_dataset.num_view}")
+    print(f"- Dimension of each view: {mv_dataset.view_dims}")
+    print(f"- Number of classes: {mv_dataset.num_class}")
+    # print(f"- Label: {torch.bincount(mv_dataset.labels).cpu().numpy()}")
     
     return mv_dataset
 
 
 def load_and_process_labels(adata, meta_path, sep='\t'):
-    """
-    加载并处理标签数据
-    
-    参数:
-    - adata: AnnData对象
-    - meta_path: 元数据文件路径
-    - sep: 文件分隔符
-    
-    返回:
-    - 处理后的标签数组和标签编码器
-    """
-    
-    # 1. 读取元数据文件
-    print(f"正在读取元数据文件: {meta_path}")
+
     df = pd.read_csv(meta_path, sep=sep)
-    
-    # 2. 检查必要列是否存在
+
     if 'Joint_clusters' not in df.columns:
-        raise ValueError(f"元数据文件中未找到 'Joint_clusters' 列。可用列: {df.columns.tolist()}")
-    
-    # 3. 提取标签列
+        raise ValueError(f"Column 'Joint_clusters' not found in the metadata file. Available columns: {df.columns.tolist()}")
+
     joint_clusters = df['Joint_clusters'].copy()
     
-    # # 4. 检查标签数据质量
-    # print("\n=== 标签数据统计 ===")
-    # print(f"总样本数: {len(joint_clusters)}")
-    # print(f"标签分布:\n{joint_clusters.value_counts(dropna=False)}")
-    # print(f"NaN值数量: {joint_clusters.isna().sum()}")
-    # print(f"唯一标签数量: {joint_clusters.nunique()}")
-    
-    # 5. 处理缺失值
     if joint_clusters.isna().any():
-        print(f"\n发现 {joint_clusters.isna().sum()} 个缺失值，将其标记为 'Unknown'")
+        print(f"\nFound {joint_clusters.isna().sum()} missing values, marking them as 'Unknown'")
         joint_clusters = joint_clusters.fillna('Unknown')
-    
-    # 6. 确保标签为字符串类型
+
     joint_clusters = joint_clusters.astype(str)
     
-    # 7. 标签编码
+
     label_encoder = LabelEncoder()
     encoded_labels = label_encoder.fit_transform(joint_clusters)
     
-    # 8. 打印编码映射
-    print(f"\n=== 标签编码映射 ===")
+
     for original, encoded in zip(label_encoder.classes_, range(len(label_encoder.classes_))):
         count = (joint_clusters == original).sum()
-        print(f"  {original} -> {encoded} (数量: {count})")
+        print(f"  {original} -> {encoded} (number: {count})")
     
-    # 9. 验证数据对齐
+
     if len(encoded_labels) != adata.n_obs:
-        print(f"\n警告: 标签数量({len(encoded_labels)})与adata观测数({adata.n_obs})不匹配!")
-        # 如果数量不匹配，可能需要进一步处理
+        print(f"\nWarning: Number of labels ({len(encoded_labels)}) does not match the number of observations in adata ({adata.n_obs})!")
+        # If the counts do not match, further processing may be required
         if len(encoded_labels) > adata.n_obs:
-            print("将截断标签以匹配adata观测数")
+            print("Truncating labels to match the number of observations in adata")
             encoded_labels = encoded_labels[:adata.n_obs]
         else:
-            print("将使用前N个标签，adata的多余观测将没有标签")
+            print("Using the first N labels; the extra observations in adata will have no labels")
     else:
-        print(f"\n标签与adata观测数匹配: {len(encoded_labels)}")
+        print(f"\nLabels match the number of observations in adata: {len(encoded_labels)}")
     
-    # 10. 将处理后的标签添加到adata
-    adata.obs['ground_truth'] = joint_clusters.values[:adata.n_obs]
-    adata.obs['ground_truth_encoded'] = encoded_labels[:adata.n_obs]
-    
-    print(f"\n=== 处理完成 ===")
-    print(f"最终标签分布:\n{adata.obs['ground_truth_encoded'].value_counts().sort_index()}")
-    print(f"总类别数: {len(np.unique(encoded_labels))}")
-    
+
+    print(f"\n=== Processing completed ===")
+    print(f"Final label distribution:\n{adata.obs['ground_truth_encoded'].value_counts().sort_index()}")
+    print(f"Total number of classes: {len(np.unique(encoded_labels))}")
     return encoded_labels[:adata.n_obs], label_encoder
