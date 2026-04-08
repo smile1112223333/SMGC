@@ -61,7 +61,7 @@ def mclust_R(adata, num_cluster, modelNames='EEE', used_obsm='SMGC', random_seed
     try:
         res = ro.r(f'Mclust(X, G={num_cluster}, modelNames="{modelNames}")')
     except Exception as e:
-        print("❌ Mclust报错:", e)
+        print("❌ Mclust error:", e)
         raise
 
     # extract classification labels
@@ -198,7 +198,6 @@ def plot_weight_value(alpha, label, modality1='mRNA', modality2='protein'):
 
 
 def init_torch(seed):
-    # 随机数种子
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -222,7 +221,7 @@ def load_mat(path, views=None, key_feature="data", key_label="labels"):
     for v in range(num_view):
         tmp = data[key_feature][v][0].squeeze()
         feature.append(tmp)
-    # 打乱样本
+   
     rand_permute = np.random.permutation(num_smp)
     for v in range(num_view):
         feature[v] = feature[v][rand_permute]
@@ -233,7 +232,7 @@ def load_mat(path, views=None, key_feature="data", key_label="labels"):
     return views_feature, label
 
 
-# 实现功能：返回参数组合的笛卡尔集
+
 def get_all_parameters(*parameters_range):
     return itertools.product(*parameters_range)
 
