@@ -23,7 +23,7 @@ class Encoder(nn.Module):
                 ])
             middle_layers.append(nn.Sequential(*layer))
         middle_layers.append(nn.Linear(middle_dims[-2], middle_dims[-1]))
-        # Completer在编码层加了一层Softmax
+        # 
         # middle_layers.append(nn.Softmax(dim=1))
         self.middle_layers = middle_layers
         self.middle_dims = middle_dims
@@ -52,7 +52,7 @@ class Decoder(nn.Module):
                 ])
             middle_layers.append(nn.Sequential(*layer))
         middle_layers.append(nn.Linear(middle_dims[-2], middle_dims[-1]))
-        # 控制输出范围在0-1之间
+        # 
         middle_layers.append(nn.Sigmoid())
         self.middle_layers = middle_layers
         self.middle_dims = middle_dims
@@ -63,7 +63,7 @@ class Decoder(nn.Module):
         return x
 
 
-# 重构和Prediction都可以使用自编码器的结构
+
 class AutoEncoder(nn.Module):
     def __init__(self,
                  input_dim: int,
@@ -92,16 +92,16 @@ class AutoEncoder(nn.Module):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-        # 返回最后一次的结果
+
         return h, x_rs
 
 
-# 仅编码器
+
 class MultiviewPrediction(nn.Module):
     def __init__(self, view_dims, latent_dim, middle_encoders, use_linear_projection=False):
         super(MultiviewPrediction, self).__init__()
         self.num_view = len(view_dims)
-        # 构建num_view个编码器
+        # 
         encoder_list = nn.ModuleList()
         for i in range(self.num_view):
             if middle_encoders is None:
@@ -129,7 +129,7 @@ class MultiviewAutoEncoder(nn.Module):
     def __init__(self, view_dims, latent_dim, middle_encoders, use_linear_projection=False):
         super(MultiviewAutoEncoder, self).__init__()
         num_view = len(view_dims)
-        # 构建num_view个自编码器
+        # 
         autoencoder_list = nn.ModuleList()
         for i in range(num_view):
             if middle_encoders is None:
@@ -184,7 +184,7 @@ class MultiviewAutoEncoderWithAvgpool(nn.Module):
     def __init__(self, view_dims, latent_dim, middle_encoders, use_linear_projection=False):
         super(MultiviewAutoEncoderWithAvgpool, self).__init__()
         num_view = len(view_dims)
-        # 构建num_view个自编码器
+        # 
         autoencoder_list = nn.ModuleList()
         for i in range(num_view):
             if middle_encoders is None:
