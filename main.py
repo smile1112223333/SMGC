@@ -39,7 +39,7 @@ fix_seed(random_seed)
 
 # ---------- Path settings ----------
 DATA_DIR = '/root/shared-nvme/dzxdata/Human_Lymph_Nodes/D1/'  
-OUTPUT_FILE = '/root/new下游分析/clustering-visual/HLN-D1_output_results.h5ad'  # output file
+OUTPUT_FILE = '/root/new/clustering-visual/HLN-D1_output_results.h5ad'  # output file
 
 # ---------- 1. Load data ----------
 adata_omics1 = sc.read_h5ad(DATA_DIR + 'adata_RNA.h5ad')
